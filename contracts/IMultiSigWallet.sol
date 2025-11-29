@@ -1,42 +1,10 @@
-Name : Jack Zheng
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.6.12;
 
-
-Concept
-A multi-signature wallet allows a group of addresses to collectively manage ETH or tokens.
-Funds can only be withdrawn or transferred if a minimum number of approvals is reached.
-
-some features
-Sets of owners
-Minimum approvals required (threshold)
-Submit transactions (recipient + amount)
-Owners approve transactions
-Transaction executes only when approvals ≥ threshold
-
-
-Purpose of the Multi Signature Wallet
-
-This contract provides a secure, decentralized way for a group to manage ETH.
-
-Funds are only transferred when a required number of owners approve a transaction.
-
-Multiple owners must agree on transfers so it is secure and prevents against a single compromised key
-
-it is transparent becuase all proposed and approved transactions are on the chain aka network
-
-Owners can add/remove transactions, approve them, and execute once the threshold is met
-
-All actions (submission, approval, execution) use tracking
-
-middleman operations requiring multiple parties
-
-
-
-pragma solidity >=0.4.0 <0.7.0;
-
+/// @title MultiSig Wallet Interface
 /// @author Jack Zheng
-/// @title Interface for a Multi-Signature Wallet
-interface IMultiSigWallet {
-    /// Events
+abstract contract IMultiSigWallet {
+
     /// @param sender The address sending ETH
     /// @param amount The amount of ETH deposited
     event Deposit(
@@ -48,7 +16,7 @@ interface IMultiSigWallet {
     /// @param txID The index of the submitted transaction
     /// @param recipient The destination address of the transaction
     /// @param amount The ETH amount to be sent
-    /// @param info The info of data
+    /// @param info Additional data for the transaction
     event SubmitTransaction(
         address indexed owner,
         uint indexed txID,
@@ -78,41 +46,39 @@ interface IMultiSigWallet {
         uint indexed txID
     );
 
-    // Functions
+    /// @param owners The list of initial owners
+    /// @param required The number of confirmations required
+    constructor(address[] memory owners, uint256 required) public {
+        // Implementation goes in derived contract
+    }
+
     /// @param recipient The destination address of the transaction
     /// @param amount The ETH amount to send
-    /// @param info the info of data
+    /// @param info Additional data for the transaction
     function submitTransaction(
         address recipient,
         uint256 amount,
-        bytes info
-    )
-        external;
+        bytes memory info
+    ) external virtual;
 
     /// @param txID The index of the transaction to confirm
     function confirmTransaction(
         uint256 txID
-    )
-        external;
+    ) external virtual;
 
-    /// @param txID The index of the transaction to revoke confirmation for
+    /// @param txIndex The index of the transaction to revoke confirmation for
     function revokeConfirmation(
-        uint256 txID
-    )
-        external;
+        uint256 txIndex
+    ) external virtual;
 
     /// @param txID The index of the transaction to execute
     function executeTransaction(
         uint256 txID
-    )
-        external;
+    ) external virtual;
 
     /// @param txID The index of the transaction
     /// @return count The number of confirmations
     function getConfirmationCount(
         uint256 txID
-    )
-        external
-        view
-        returns (uint256 count);
+    ) external view virtual returns (uint256 count);
 }
