@@ -4,14 +4,14 @@ contract("MultiSigWallet", async accounts => {
   let wallet;//holds deployed wallet
 
   const owners = [
-    "0xF82E4D100B80EB5F031f7f079F6401E996565863",//addy 1 inddex 0
-    "0x489d2c02179f03802c357c766f62d455442Cf007",//addy 2 index 1 
-    "0xB8FDc2Be5690F386C102B06060DA6936444aAb91",//addy 3 index 2 
-    "0x4B54f47aBE69853e75f9bFaC797442b55136A416",//addy 4 index 3 
-    "0x1DFe37D28315688Ba87141B2D970950348B4562a"//addy 5 index 4
+    "0xf2e790bA51D16E8261A9690A3A4Abc070d0611a3",//addy 1 inddex 0
+    "0xDD30Ea3Ce36FD8F7322BfaD5034C40e974ee6207",//addy 2 index 1 
+    "0xf8d40eE4DA9eA4c0C68b2835Be3ab195f695953C",//addy 3 index 2 
+    "0x86C07A39E0898B6292eb1D2be5091Cf4E939001d",//addy 4 index 3 
+    "0x933b934bd33b2c1b0E6069cB2BBFcD58930048a7"//addy 5 index 4
   ];
   const threshold = 4;//minimum confirmations
-  const recipient = "0x4c7aF7Db6faB11298C9F0714ae7bF1e755446eD2";//addy to transfer ETH
+  const recipient = "0xC2cB41D21a285E1942743548d7Ac47Aa5650c562";//addy to transfer ETH
 
 
 //Submit transaction
