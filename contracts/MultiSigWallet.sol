@@ -19,6 +19,9 @@ contract MultiSigWallet {
         bytes info;
         bool executed;
         uint numConfirmations;
+        {
+    Transaction storage tx = transactions[_txID];
+    return (tx.recipient, tx.amount, tx.info, tx.executed, tx.numConfirmations);
     }
 
     mapping(uint => mapping(address => bool)) public isConfirmed;

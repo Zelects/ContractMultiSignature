@@ -1,7 +1,7 @@
 const MultiSigWallet = artifacts.require("MultiSigWallet");
 
 contract("MultiSigWallet", async accounts => {
-  let wallet;
+  let wallet;//holds deployed wallet
 
   const owners = [
     "0xF82E4D100B80EB5F031f7f079F6401E996565863",//addy 1 inddex 0
@@ -10,33 +10,35 @@ contract("MultiSigWallet", async accounts => {
     "0x4B54f47aBE69853e75f9bFaC797442b55136A416",//addy 4 index 3 
     "0x1DFe37D28315688Ba87141B2D970950348B4562a"//addy 5 index 4
   ];
-  const threshold = 4;
-  const recipient = "0x4c7aF7Db6faB11298C9F0714ae7bF1e755446eD2";
-
+  const threshold = 4;//minimum confirmations
+  const recipient = "0x4c7aF7Db6faB11298C9F0714ae7bF1e755446eD2";//addy to transfer ETH
 
 
 //Submit transaction
   const submitTransaction = async (amount, txIndex) => {
     await wallet.submitTransaction(recipient,web3.utils.toWei(amount.toString(), "ether"),"0x",
-  { from: owners[0] }//submitter
+  { from: owners[0] }//submitter to recipient can change if needed 
   );
     console.log(`Transaction #${txIndex} submitted: ${amount} ETH`);
   };
 
+
+
+
 //confirm transaction by rotating owners
 const confirmTransactionRotated = async (txIndex, numConfirmations) => {
   const tx = await wallet.transactions(txIndex);
-  const alreadyConfirmed = [];
+  const alreadyConfirmed = [];//array of wallet IDS already confirmed 
 
   for (const owner of owners) {
     const isConfirmed = await wallet.isConfirmed(txIndex, owner);
     if (isConfirmed) alreadyConfirmed.push(owner); //Check which owners have already confirmed
   }
 
-  let confirmedCount = 0;
+  let confirmedCount = 0;//start with 0 and then go up with confirmed counts
   let i = 0;
   while (confirmedCount < numConfirmations) {
-    const owner = owners[i % owners.length];
+    const owner = owners[i % owners.length];//loops through owners who have confirmed 
     if (!alreadyConfirmed.includes(owner)) {
       await wallet.confirmTransaction(txIndex, { from: owner });
       console.log(`Transaction #${txIndex} confirmed by ${owner}`);
@@ -48,13 +50,15 @@ const confirmTransactionRotated = async (txIndex, numConfirmations) => {
   console.log(`Transaction #${txIndex} confirmations: ${updatedTx.numConfirmations}`);
 };
 
+
+
 //revoke a confirmation
 const revokeConfirmation = async (txIndex, revokerIndex) => {
   const revoker = owners[revokerIndex];
   await wallet.revokeConfirmation(txIndex, { from: revoker });
   console.log(`Transaction #${txIndex} confirmation revoked by ${revoker}`);
 
-  const updatedTx = await wallet.transactions(txIndex);
+  const updatedTx = await wallet.transactions(txIndex);//revokes a transaction 
   console.log(`Transaction #${txIndex} confirmations now: ${updatedTx.numConfirmations}`);
 };
 
@@ -62,11 +66,12 @@ const revokeConfirmation = async (txIndex, revokerIndex) => {
 //execute transaction
   const executeTransaction = async (txIndex) => {
     try {
+      //balances before execution
       const walletBalanceBefore = await web3.eth.getBalance(wallet.address);
       const recipientBalanceBefore = await web3.eth.getBalance(recipient);
 
       await wallet.executeTransaction(txIndex, { from: owners[0] });
-
+      //balances after execution
       const walletBalanceAfter = await web3.eth.getBalance(wallet.address);
       const recipientBalanceAfter = await web3.eth.getBalance(recipient);
 
@@ -83,7 +88,7 @@ const revokeConfirmation = async (txIndex, revokerIndex) => {
       );
     } catch (error) {
       console.log(`Transaction #${txIndex} NOT executed yet. Reason: ${error.reason || error.message}`);
-    }
+    }//log if transaction cannot be executed 
   };
 
   it("Deploy wallet with 5 owners and 4 confirmations required, and deposit 20 ETH", async () => {
@@ -99,10 +104,10 @@ const revokeConfirmation = async (txIndex, revokerIndex) => {
     console.log("Wallet initial balance:", web3.utils.fromWei(walletBalance, "ether"), "ETH");
   });
 
-  // Transaction 1: 1 ETH, fully confirmed by 4 owners
+  // Transaction 1: 1 ETH, fully confirmed by 5 owners
   it("Transaction 1: submit, confirm with 4 owners, then execute", async () => {
     await submitTransaction(1, 0);
-    await confirmTransactionRotated(0, 4);//4 confirmations
+    await confirmTransactionRotated(0, 5);//5 confirmations
     await executeTransaction(0);
   });
 
